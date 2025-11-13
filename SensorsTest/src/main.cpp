@@ -13,12 +13,16 @@ This sketch can be modified to deal with tank turning, if code for the second mo
 */
 //Alterations done by Maximo Ruiz and Trevor Onions (sensors team)
 
-const byte trigPin = 7; //trigger pin is pin 7.
-const byte echoPin = 8; // echo pin is pin 8.
+//DC Motor Pin locations 
+  // const byte in1 = 13; //in1 pin on H-Bridge is connected to pin 13. in1 is one part of the logic for motor direction.
+  // const byte in2 = 12; //in2 pin on H-Bridge is connected to pin 12. in2 is the second part of motor direction logic. 
+  // const byte enA = 11; //enA pin on H-Bridge is connected to pin 11. Handles the PWM for the motor.
+
+// 
+const byte trigSensor1 = 7; //trigger pin is pin 7.
+const byte echoSensor1 = 8; // echo pin is pin 8
+
 const byte redLedPin = 6; //red LED pin is connected to pin 6.
-const byte in1 = 13; //in1 pin on H-Bridge is connected to pin 13. in1 is one part of the logic for motor direction.
-const byte in2 = 12; //in2 pin on H-Bridge is connected to pin 12. in2 is the second part of motor direction logic. 
-const byte enA = 11; //enA pin on H-Bridge is connected to pin 11. Handles the PWM for the motor.
 const byte servoDir = 3; //PWM on MG90S servo is connected to pin 3. Handles the direction of the servo motor.
 int x = 45;
 int y = 45; 
@@ -27,17 +31,22 @@ bool isForward = true;
 //The H-Bridge will handle power to the motors. This code/sketch handles the direction and PWM logic. 
 
 void setup() {
-  // initialize serial communication:
   Serial.begin(9600); //default Baud rate of 9600
-  pinMode(trigPin, OUTPUT); //trigger signal to send to sensor.
-  pinMode(echoPin, INPUT); //signal received from sensor.
+  // initialize serial communication:
+  
+  // Setting inputs and outputs for DC motors
+    // pinMode(in1, OUTPUT); //in1 signal is output.
+    // pinMode(in2, OUTPUT); //in2 signal is output.
+    // pinMode(enA, OUTPUT); //enA (PWM signal) is output.
+  
+  
+  pinMode(trigSensor1, OUTPUT); //trigger signal to send to sensor.
+  pinMode(echoSensor1, INPUT); //signal received from sensor.
   pinMode(redLedPin, OUTPUT); //power sent to LED.
-  pinMode(in1, OUTPUT); //in1 signal is output.
-  pinMode(in2, OUTPUT); //in2 signal is output.
-  pinMode(enA, OUTPUT); //enA (PWM signal) is output.
+  
   pinMode(servoDir, OUTPUT); //servoDir is output.
 }
-int servoRotate(int x, int start, int finish, int jump) { //max for finish is 255, and min for start is 45
+void servoRotate(int start, int finish, int jump) { //max for finish is 255, and min for start is 45
   if (x <= finish && isForward == true){ 
     x += jump;
     if (x == finish) {
@@ -51,7 +60,6 @@ int servoRotate(int x, int start, int finish, int jump) { //max for finish is 25
     }
   }
   Serial.println(isForward);
-  return x; 
 }
 
 long microsecondsToInches(long microseconds) {
@@ -71,21 +79,22 @@ long microsecondsToCentimeters(long microseconds) {
 }
 
 void loop() {
+  delay(30);
   // establish variables for duration of the ping, and the distance result
   // in inches and centimeters:
   long duration, inches, cm;
 
   // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
   // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
-  digitalWrite(trigPin, LOW); //trigPin set to LOW.
+  digitalWrite(trigSensor1, LOW); //trigSensor1 set to LOW.
   delayMicroseconds(2); 
-  digitalWrite(trigPin, HIGH); //trigPin sends signal for 10 microseconds.
+  digitalWrite(trigSensor1, HIGH); //trigSensor1 sends signal for 10 microseconds.
   delayMicroseconds(10); //10 microseconds.
-  digitalWrite(trigPin, LOW); //trigPin turns off.
+  digitalWrite(trigSensor1, LOW); //trigSensor1 turns off.
 
   // Ultrasonic sensor sends signal back after receiving trigger input.
   // duration is time taken by the ultrasonic burst to leave and return to the sensor.
-  duration = pulseIn(echoPin, HIGH);
+  duration = pulseIn(echoSensor1, HIGH);
 
   // convert the duration into a distance
   inches = microsecondsToInches(duration); //value1 
@@ -127,18 +136,18 @@ void loop() {
   if (cm < target_distance_cm) //If the distance detected by sensor is less than target_distance centimeters from an object.
   {
     digitalWrite(redLedPin, HIGH); //Red LED turns on.
-    digitalWrite(in1, LOW); //sets in1 low to move motor1 backwards.
-    servoRotate(x, 45, 255, 7);
+      // digitalWrite(in1, LOW); //sets in1 low to move motor1 backwards.
+    servoRotate(45, 255, 7);
     // digitalW/sets PWM of motor1 signal to 255 (100%) for full speed.
     delay(5); //without the rite(in2, HIGH); //sets in2 high to keep motor1 backwards.
-    analogWrite(enA, 255); //delay, the motor gets stuck switching between both directions very quickly. Likely due to the ultrasonic sensor not sending data in time.
+      //analogWrite(enA, 255); //delay, the motor gets stuck switching between both directions very quickly. Likely due to the ultrasonic sensor not sending data in time.
   }
   else //If distance detected is greater than target_distance centimeters...
   {
     digitalWrite(redLedPin, LOW); //red LED stays off.
-    digitalWrite(in1, HIGH); //sets in1 high to keep motor1 forward.
-    digitalWrite(in2, LOW); //sets in2 low to keep motor1 forward.
-    analogWrite(enA, 255); //sets PWM of motor1 signal to 255 (100%) for full speed.
+      //digitalWrite(in1, HIGH); //sets in1 high to keep motor1 forward.
+      //digitalWrite(in2, LOW); //sets in2 low to keep motor1 forward.
+      //analogWrite(enA, 255); //sets PWM of motor1 signal to 255 (100%) for full speed.
     delay(5); //without the delay, the motor gets stuck switching between both directions very quickly. Likely due to the ultrasonic sensor not sending data in time.
 
     //NOTE: If the code works as intended, the cart/chassis will eventually reach a wall, go backwards, then get stuck between forwards and backwards.
