@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include <Servo.h>
+
 //Testing to see if this updates on git 
 /*
 This sketch uses the PING ))) example format provided by Arduino, with some modifications, to 
@@ -21,54 +23,40 @@ This sketch can be modified to deal with tank turning, if code for the second mo
 // 
 const byte trigSensor1 = 7; //trigger pin is pin 7.
 const byte echoSensor1 = 8; // echo pin is pin 8
+const byte trigSensor2 = 12;
+const byte echoSensor2 = 13;
 
 const byte redLedPin = 6; //red LED pin is connected to pin 6.
 const byte servoDir = 3; //PWM on MG90S servo is connected to pin 3. Handles the direction of the servo motor.
 int x = 45;
 int y = 45; 
 bool isForward = true;
+Servo myServo;
+int pos = 0;
 //NOTE: The motor power will be supplied externally using an H-Bridge transistor for pin logic. The Arduino board I/O pins can only output 40mA of current.
 //The H-Bridge will handle power to the motors. This code/sketch handles the direction and PWM logic. 
 
 void setup() {
   Serial.begin(9600); //default Baud rate of 9600
-  // initialize serial communication:
   
-  // Setting inputs and outputs for DC motors
-    // pinMode(in1, OUTPUT); //in1 signal is output.
-    // pinMode(in2, OUTPUT); //in2 signal is output.
-    // pinMode(enA, OUTPUT); //enA (PWM signal) is output.
-  
-  
+  myServo.attach(3);
   pinMode(trigSensor1, OUTPUT); //trigger signal to send to sensor.
   pinMode(echoSensor1, INPUT); //signal received from sensor.
   pinMode(redLedPin, OUTPUT); //power sent to LED.
   
   pinMode(servoDir, OUTPUT); //servoDir is output.
 }
-void servoRotate(int start, int finish, int jump) { //max for finish is 255, and min for start is 45
-  if (x <= finish && isForward == true){ 
-    x += jump;
-    if (x == finish) {
-      isForward = false;
-    }
-  }
-  else{
-    x -= jump;
-    if (x == start) { //Lowest value taken by MG 996R (needs more testing)
-      isForward = true;
-    }
-  }
-  Serial.println(isForward);
-}
 
-long microsecondsToInches(long microseconds) {
-  // According to Parallax's datasheet for the PING))), there are 73.746
-  // microseconds per inch (i.e. sound travels at 1130 feet per second).
-  // This gives the distance travelled by the ping, outbound and return,
-  // so we divide by 2 to get the distance of the obstacle.
-  // See: https://www.parallax.com/package/ping-ultrasonic-distance-sensor-downloads/
-  return microseconds / 74 / 2;
+void servoSweep() {
+  if (pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
+    // in steps of 1 degree
+    myServo.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+  }
+  else if (pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+    myServo.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15ms for the servo to reach the position
+  }
 }
 
 long microsecondsToCentimeters(long microseconds) {
@@ -97,7 +85,7 @@ void loop() {
   duration = pulseIn(echoSensor1, HIGH);
 
   // convert the duration into a distance
-  inches = microsecondsToInches(duration); //value1 
+
   cm = microsecondsToCentimeters(duration); //value2
 
   Serial.print(inches);
@@ -119,13 +107,6 @@ void loop() {
 
   //NOTE: servo works properly, but seems to swing back to one position randomly at first.
   
-  // for (int i = 0; i <= 255; i++) //i is PWM value for servo motor direction.
-  // {
-  //   delay(5); //
-  //   analogWrite(servoDir, i); //direction will go from 0 to 180 degrees.
-  //   //Space to put DC motor control code here.
-  //   delay(1000); //5 ms delay to see movement.
-  // }
 
   //*****END OF SERVO MOTOR POSITION CODE*****
 
@@ -137,17 +118,15 @@ void loop() {
   {
     digitalWrite(redLedPin, HIGH); //Red LED turns on.
       // digitalWrite(in1, LOW); //sets in1 low to move motor1 backwards.
-    servoRotate(45, 255, 7);
+    //servoRotate(45, 255, 7);
+    servoSweep();
     // digitalW/sets PWM of motor1 signal to 255 (100%) for full speed.
     delay(5); //without the rite(in2, HIGH); //sets in2 high to keep motor1 backwards.
       //analogWrite(enA, 255); //delay, the motor gets stuck switching between both directions very quickly. Likely due to the ultrasonic sensor not sending data in time.
   }
   else //If distance detected is greater than target_distance centimeters...
   {
-    digitalWrite(redLedPin, LOW); //red LED stays off.
-      //digitalWrite(in1, HIGH); //sets in1 high to keep motor1 forward.
-      //digitalWrite(in2, LOW); //sets in2 low to keep motor1 forward.
-      //analogWrite(enA, 255); //sets PWM of motor1 signal to 255 (100%) for full speed.
+    digitalWrite(redLedPin, LOW); //red LED stays off.  
     delay(5); //without the delay, the motor gets stuck switching between both directions very quickly. Likely due to the ultrasonic sensor not sending data in time.
 
     //NOTE: If the code works as intended, the cart/chassis will eventually reach a wall, go backwards, then get stuck between forwards and backwards.
