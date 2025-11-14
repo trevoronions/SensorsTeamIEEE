@@ -88,14 +88,14 @@ void loop() {
 
   if (cm1 < targetDistancecm) //If the distance detected by sensor is less than target_distance centimeters from an object.
   {
-    Serial.println("Stop");
+    Serial.println("Go");
     servoSweep(servo1);
     delay(5); 
 
   }
   else
   {
-    Serial.println("Go");
+    Serial.println("Stop");
     delay(5); //without the delay, the motor gets stuck switching between both directions very quickly. Likely due to the ultrasonic sensor not sending data in time.
 
     //NOTE: If the code works as intended, the cart/chassis will eventually reach a wall, go backwards, then get stuck between forwards and backwards.
