@@ -18,29 +18,31 @@ const byte trigSensor1 = 7; //trigger pin is pin 7.
 const byte echoSensor1 = 8; // echo pin is pin 8
 const byte trigSensor2 = 12;
 const byte echoSensor2 = 13;
-Servo myServo;
+Servo servo1;
+
 int pos = 0;
+const int targetDistancecm = 10;
 //NOTE: The motor power will be supplied externally using an H-Bridge transistor for pin logic. The Arduino board I/O pins can only output 40mA of current.
 //The H-Bridge will handle power to the motors. This code/sketch handles the direction and PWM logic. 
 
 void setup() {
   Serial.begin(9600); //default Baud rate of 9600
   
-  myServo.attach(3);
+  servo1.attach(3);
   pinMode(trigSensor1, OUTPUT); //trigger signal to send to sensor.
   pinMode(echoSensor1, INPUT); //signal received from sensor.
 }
 
-void servoSweep() {
-  if (pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
+void servoSweep(Servo servoNum) {
+  for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
     // in steps of 1 degree
-    myServo.write(pos);              // tell servo to go to position in variable 'pos'
+    servoNum.write(pos);              // tell servo to go to position in variable 'pos'
     delay(15);                       // waits 15ms for the servo to reach the position
   }
-  else if (pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
-    myServo.write(pos);              // tell servo to go to position in variable 'pos'
-    delay(15);                       // waits 15ms for the servo to reach the position
-  }
+  // for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+  //   servoNum.write(pos);              // tell servo to go to position in variable 'pos'
+  //   delay(15);                       // waits 15ms for the servo to reach the position
+  // }
 }
 
 long microsecondsToCentimeters(long microseconds) {
@@ -54,7 +56,7 @@ void loop() {
   delay(30);
   // establish variables for duration of the ping, and the distance result
   // in inches and centimeters:
-  long duration, inches, cm;
+  long duration1, duration2, inches, cm1, cm2;
 
   // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
   // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
@@ -66,31 +68,26 @@ void loop() {
 
   // Ultrasonic sensor sends signal back after receiving trigger input.
   // duration is time taken by the ultrasonic burst to leave and return to the sensor.
-  duration = pulseIn(echoSensor1, HIGH);
-
+  duration1 = pulseIn(echoSensor1, HIGH);
+  duration2 = pulseIn(echoSensor2, HIGH);
   // convert the duration into a distance
 
-  cm = microsecondsToCentimeters(duration); //value2
-
-  Serial.print(inches);
-  Serial.print("in, ");
-  Serial.print(cm);
-  Serial.print("cm");
+  cm1 = microsecondsToCentimeters(duration1); //value2
+  cm2 = microsecondsToCentimeters(duration2);
+  Serial.println(cm1 + "cm1");
+  Serial.println(cm2 + "cm2");
   Serial.println();
 
-
-  int target_distance_cm = 10; //maximum distance from sensor needed to turn on LED and turn off motor.
-
-  if (cm < target_distance_cm) //If the distance detected by sensor is less than target_distance centimeters from an object.
+  if (cm1 < targetDistancecm) //If the distance detected by sensor is less than target_distance centimeters from an object.
   {
-
-    servoSweep();
+    Serial.println("Stop");
+    servoSweep(servo1);
     delay(5); 
 
   }
   else
   {
-  
+    Serial.println("Go");
     delay(5); //without the delay, the motor gets stuck switching between both directions very quickly. Likely due to the ultrasonic sensor not sending data in time.
 
     //NOTE: If the code works as intended, the cart/chassis will eventually reach a wall, go backwards, then get stuck between forwards and backwards.
