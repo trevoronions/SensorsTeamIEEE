@@ -15,11 +15,11 @@
 //Alterations done by Maximo Ruiz and Trevor Onions (sensors team)
 
 const byte trigSensor1 = 7; //trigger pin is pin 7.
-const byte echoSensor1 = 8; // echo pin is pin 8
-const byte trigSensor2 = 12;
-const byte echoSensor2 = 13;
-Servo servo1;
-bool isForward = true;
+const byte echoSensor1 = 8; //echo pin is pin 8
+const byte trigSensor2 = 12; //second sensor's trigger pin is pin 12. (not implemented yet)
+const byte echoSensor2 = 13; //second sensor's echo pin is pin 13. (not implemented yet)
+Servo servo1; //First servo (main servo for testing)
+bool isForward = true; //Used for servo logic in servoSweep function. When true, the servo's angle will increase. When false, the servo's angle will decrease.
 int pos = 0; //Angle of the servo.
 
 const int targetDistancecm = 10;
@@ -29,12 +29,12 @@ const int targetDistancecm = 10;
 void setup() {
   Serial.begin(9600); //default Baud rate of 9600
   
-  servo1.attach(3);
+  servo1.attach(3); //servo1 is on pin 3.
   pinMode(trigSensor1, OUTPUT); //trigger signal to send to sensor.
   pinMode(echoSensor1, INPUT); //signal received from sensor.
 }
 
-//function servoSweep sweeps the servo from 0 to 180 degrees and back. Parameter servoNum is the pin that the servo is connected to.
+//function servoSweep sweeps the servo from 0 to 180 degrees and back. Parameter servoNum is the specific servo that will be moved.
 void servoSweep(Servo servoNum) { 
   if (pos <= 180 && isForward){ //If servo position is <= 180 degrees and isForward is true...
     pos += 5; //Increase angle by 5 degrees every cycle/iteration.
