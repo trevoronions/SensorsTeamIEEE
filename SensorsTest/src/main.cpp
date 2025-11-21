@@ -20,7 +20,7 @@ const byte trigSensor2 = 12;
 const byte echoSensor2 = 13;
 Servo servo1;
 bool isForward = true;
-int pos = 0;
+int pos = 0; //Angle of the servo.
 
 const int targetDistancecm = 10;
 //NOTE: The motor power will be supplied externally using an H-Bridge transistor for pin logic. The Arduino board I/O pins can only output 40mA of current.
@@ -35,23 +35,24 @@ void setup() {
 }
 
 //function servoSweep sweeps the servo from 0 to 180 degrees and back. Parameter servoNum is the pin that the servo is connected to.
-void servoSweep(Servo servoNum) { //max for finish is 255, and min for start is 45
-  if (pos <= 180 && isForward){ 
-    pos += 5;
-    servoNum.write(pos);
-    if (pos == 180) {
-      isForward = false;
+void servoSweep(Servo servoNum) { 
+  if (pos <= 180 && isForward){ //If servo position is <= 180 degrees and isForward is true...
+    pos += 5; //Increase angle by 5 degrees every cycle/iteration.
+    servoNum.write(pos); //Servo moves to position/angle.
+    if (pos == 180) { //If position is 180.
+      isForward = false; //Make isForward false.
     }
-    delay(10);
+    delay(10); //10 ms delay to let servo move before next position input.
   }
-  else{
-    pos -= 5;
-    servoNum.write(pos);
-    if (pos == 0) { //Lowest value taken by MG 996R (needs more testing)
-      isForward = true;
+  else{ //If pos is 180 and/or isForward is false...
+    pos -= 5; //decrease angle by 5 degrees every cycle/iteration.
+    servoNum.write(pos); //Servo moves to position/angle.
+    if (pos == 0) { //If the position/angle of servo is 0...
+      isForward = true; //Make isForward true.
     }
-    delay(10);
+    delay(10); //10 ms delay to let servo move before next position input.
   }
+  //NOTE TO SELF: check if 10 ms delay is necessary here.
 }
 long microsecondsToCentimeters(long microseconds) {
   // The speed of sound is 340 m/s or 29 microseconds per centimeter.
