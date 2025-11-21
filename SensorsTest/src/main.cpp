@@ -34,7 +34,7 @@ void setup() {
   pinMode(echoSensor1, INPUT); //signal received from sensor.
 }
 
-//function servoSweep sweeps the servo from 0 to 180 degrees and back. Parameter servoNum is the specific servo that will be moved.
+//function servoSweep sweeps the servo from 0 to 180 degrees and back. Parameter "servoNum" is the specific servo that will be moved.
 void servoSweep(Servo servoNum) { 
   if (pos <= 180 && isForward){ //If servo position is <= 180 degrees and isForward is true...
     pos += 5; //Increase angle by 5 degrees every cycle/iteration.
@@ -53,6 +53,17 @@ void servoSweep(Servo servoNum) {
     delay(10); //10 ms delay to let servo move before next position input.
   }
   //NOTE TO SELF: check if 10 ms delay is necessary here.
+
+/**function ultraSon handles an ultrasonic sensor.
+ * @param sensorNum The sensor chosen.
+ * @param trigSensor The trigger pin for the sensor.
+ * @param echoSensor The echo pin for the sensor.
+*/
+// void ultraSon(int sensorNum, int trigSensor, int echoSensor)
+// {
+
+// }
+
 }
 long microsecondsToCentimeters(long microseconds) {
   // The speed of sound is 340 m/s or 29 microseconds per centimeter.
