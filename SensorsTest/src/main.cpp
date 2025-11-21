@@ -34,7 +34,7 @@ void setup() {
   pinMode(echoSensor1, INPUT); //signal received from sensor.
 }
 
-
+//function servoSweep sweeps the servo from 0 to 180 degrees and back. Parameter servoNum is the pin that the servo is connected to.
 void servoSweep(Servo servoNum) { //max for finish is 255, and min for start is 45
   if (pos <= 180 && isForward){ 
     pos += 5;
