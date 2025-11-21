@@ -14,6 +14,9 @@
   */
 //Alterations done by Maximo Ruiz and Trevor Onions (sensors team)
 
+extern long microsecondsToCentimeters(long microseconds); //setting microsecondsToCentimeters as an external function to work in ultraSon function.
+//NOTE TO SELF: setting a function as "extern" in C/C++ is the same as setting a function as "public" in Java.
+
 const byte trigSensor1 = 7; //trigger pin is pin 7.
 const byte echoSensor1 = 8; //echo pin is pin 8
 const byte trigSensor2 = 12; //second sensor's trigger pin is pin 12. (not implemented yet)
@@ -22,7 +25,7 @@ Servo servo1; //First servo (main servo for testing)
 bool isForward = true; //Used for servo logic in servoSweep function. When true, the servo's angle will increase. When false, the servo's angle will decrease.
 int pos = 0; //Angle of the servo.
 
-const int targetDistancecm = 10;
+const int targetDistancecm = 15;
 //NOTE: The motor power will be supplied externally using an H-Bridge transistor for pin logic. The Arduino board I/O pins can only output 40mA of current.
 //The H-Bridge will handle power to the motors. This code/sketch handles the direction and PWM logic. 
 
@@ -53,18 +56,39 @@ void servoSweep(Servo servoNum) {
     delay(10); //10 ms delay to let servo move before next position input.
   }
   //NOTE TO SELF: check if 10 ms delay is necessary here.
+}
 
-/**function ultraSon handles an ultrasonic sensor.
+/**ultraSon handles an ultrasonic sensor.
  * @param sensorNum The sensor chosen.
  * @param trigSensor The trigger pin for the sensor.
  * @param echoSensor The echo pin for the sensor.
 */
-// void ultraSon(int sensorNum, int trigSensor, int echoSensor)
-// {
+int ultraSon(/*int sensorNum, */int trigSensor, int echoSensor) //TEMPORARILY REMOVED sensorNum
+{
+  //NOTE TO SELF: in the const ints above, put the trigSensor and echoSensor values for each sensor into an array. 
+  //Index the array here based on sensorNum later. That way, only sensorNum will be needed.
 
-// }
+  int distance; //"distance" is the distance calculated by the sensor in cm.
+  int durationFunc; //"durationFunc" is the same as "duration", but in this function.
 
+  // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
+  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+  digitalWrite(trigSensor, LOW); //trigSensor1 set to LOW.
+  delayMicroseconds(2); //2 microseconds.
+  digitalWrite(trigSensor, HIGH); //trigSensor1 sends signal for 10 microseconds.
+  delayMicroseconds(10); //10 microseconds.
+  digitalWrite(trigSensor, LOW); //trigSensor1 turns off.
+  // Ultrasonic sensor sends signal back after receiving trigger input.
+
+  durationFunc = pulseIn(echoSensor, HIGH); // duration is time taken by the ultrasonic burst to leave and return to the sensor.
+  //duration2 = pulseIn(echoSensor2, HIGH);
+  // convert the duration into a distance
+
+  distance = microsecondsToCentimeters(durationFunc); //convert duration of signal to distance in cm.
+
+  return distance; //return "distance"
 }
+
 long microsecondsToCentimeters(long microseconds) {
   // The speed of sound is 340 m/s or 29 microseconds per centimeter.
   // The ping travels out and back, so to find the distance of the object we
@@ -78,22 +102,25 @@ void loop() {
   // in inches and centimeters:
   long duration1, duration2, cm1, cm2;
 
-  // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
-  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
-  digitalWrite(trigSensor1, LOW); //trigSensor1 set to LOW.
-  delayMicroseconds(2); 
-  digitalWrite(trigSensor1, HIGH); //trigSensor1 sends signal for 10 microseconds.
-  delayMicroseconds(10); //10 microseconds.
-  digitalWrite(trigSensor1, LOW); //trigSensor1 turns off.
+  // // The PING))) is triggered by a HIGH pulse of 2 or more microseconds.
+  // // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
+  // digitalWrite(trigSensor1, LOW); //trigSensor1 set to LOW.
+  // delayMicroseconds(2); 
+  // digitalWrite(trigSensor1, HIGH); //trigSensor1 sends signal for 10 microseconds.
+  // delayMicroseconds(10); //10 microseconds.
+  // digitalWrite(trigSensor1, LOW); //trigSensor1 turns off.
 
-  // Ultrasonic sensor sends signal back after receiving trigger input.
-  // duration is time taken by the ultrasonic burst to leave and return to the sensor.
-  duration1 = pulseIn(echoSensor1, HIGH);
-  //duration2 = pulseIn(echoSensor2, HIGH);
-  // convert the duration into a distance
+  // // Ultrasonic sensor sends signal back after receiving trigger input.
+  // // duration is time taken by the ultrasonic burst to leave and return to the sensor.
+  // duration1 = pulseIn(echoSensor1, HIGH);
+  // //duration2 = pulseIn(echoSensor2, HIGH);
+  // // convert the duration into a distance
 
-  cm1 = microsecondsToCentimeters(duration1); //value2
+  // cm1 = microsecondsToCentimeters(duration1); //value2
   //cm2 = microsecondsToCentimeters(duration2);
+
+  cm1 = ultraSon(trigSensor1, echoSensor1);
+  
   Serial.println(cm1);
   //Serial.println(cm2 + "cm2");
   Serial.println();
