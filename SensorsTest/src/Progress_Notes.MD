@@ -9,3 +9,12 @@
 -Started writing code for the sensor function.
 
 Overall the code works just fine for one servo and one sensor. Next task would be to implement the sensor code as a function so we can move on to using multiple sensors and multiple servos (if that's still a goal). We still have to determine what each sensor will be meant for (front, sides, etc), but right now we shouldn't worry about it yet.
+
+## 11/21/25 (by Max)
+-Turned code that dealt with sensor into a function.
+-Added second sensor and second servo.
+-Successfully compiled code that deals with two sensors and two servos. Not perfect, but it works.
+--For some reason, both servos go at double speed when both sensors detect an object. If only one sensor detects an object, its corresponding servo will respond normally.
+--Still a rough draft, so the actual code needs some refining to make adding move sensors and servos less tedious, and fix the problem mentioned above.
+
+Overall we can now use two sensors and two servos, with each servo corresponding to a sensor. Just need to figure out why the servos go at double speed when both sensors detect something.
