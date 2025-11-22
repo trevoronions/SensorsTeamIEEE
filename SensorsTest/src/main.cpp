@@ -15,7 +15,7 @@
 //Alterations done by Maximo Ruiz and Trevor Onions (sensors team)
 
 extern long microsecondsToCentimeters(long microseconds); //setting microsecondsToCentimeters as an external function to work in ultraSon function.
-//NOTE TO SELF: setting a function as "extern" in C/C++ is the same as setting a function as "public" in Java.
+//NOTE TO SELF: setting a function as "extern" in C/C++ allows the function to be used within other functions.
 
 const byte trigSensor1 = 7; //trigger pin is pin 7.
 const byte echoSensor1 = 8; //echo pin is pin 8
@@ -24,13 +24,12 @@ const byte echoSensor2 = 13; //second sensor's echo pin is pin 13. (not implemen
 Servo servo1; //First servo (main servo for testing)
 Servo servo2; //Second servo
 bool isForward1 = true; //Used for servo logic in servoSweep function. When true, the servo's angle will increase. When false, the servo's angle will decrease.
-int pos1 = 0; //Angle of the first servo.
-int pos2 = 0; //Angle of the second servo.
+bool isForward2 = true; //Same idea as isForward1.
+int pos1 = 0; //Angle of servo1.
+int pos2 = 0; //Angle of servo2.
 
 const int targetDistanceCm1 = 15; //minimum distance for servo1 to move.
 const int targetDistanceCm2 = 15; //miniumum distance for servo2 to move.
-//NOTE: The motor power will be supplied externally using an H-Bridge transistor for pin logic. The Arduino board I/O pins can only output 40mA of current.
-//The H-Bridge will handle power to the motors. This code/sketch handles the direction and PWM logic. 
 
 void setup() {
   Serial.begin(9600); //default Baud rate of 9600
@@ -44,26 +43,52 @@ void setup() {
 }
 
 /**servoSweep sweeps the servo from 0 to 180 degrees and back. 
- * @param servoNum is the specific servo that will be moved.
+ * @param servoNum is the number corresponding to the specific servo that will be moved.
 */
-void servoSweep(Servo servoNum) { 
-  if (pos1 <= 180 && isForward1){ //If servo position is <= 180 degrees and isForward is true...
-    pos1 += 5; //Increase angle by 5 degrees every cycle/iteration.
-    servoNum.write(pos1); //Servo moves to position/angle.
-    if (pos1 == 180) { //If position is 180.
-      isForward1 = false; //Make isForward false.
-    }
-    delay(10); //10 ms delay to let servo move before next position input.
+void servoSweep(int servoNum) { 
+  switch(servoNum) //switch statement reads value of servoNum parameter.
+  {
+    case(1): //if servoNum is 1.
+      if (pos1 <= 180 && isForward1){ //If servo position is <= 180 degrees and isForward is true...
+        pos1 += 5; //Increase angle by 5 degrees every cycle/iteration.
+        servo1.write(pos1); //Servo moves to position/angle.
+        if (pos1 == 180) { //If position is 180.
+          isForward1 = false; //Make isForward false.
+        }
+        delay(10); //10 ms delay to let servo move before next position input.
+      }
+      else{ //If pos is 180 and/or isForward is false...
+        pos1 -= 5; //decrease angle by 5 degrees every cycle/iteration.
+        servo1.write(pos1); //Servo moves to position/angle.
+        if (pos1 == 0) { //If the position/angle of servo is 0...
+          isForward1 = true; //Make isForward true.
+        }
+        delay(10); //10 ms delay to let servo move before next position input.
+      }
+    break;
+    case(2): //if servoNum is 2.
+      if (pos2 <= 180 && isForward2){ //If servo position is <= 180 degrees and isForward is true...
+        pos2 += 5; //Increase angle by 5 degrees every cycle/iteration.
+        servo2.write(pos2); //Servo moves to position/angle.
+        if (pos2 == 180) { //If position is 180.
+          isForward2 = false; //Make isForward false.
+        }
+        delay(10); //10 ms delay to let servo move before next position input.
+      }
+      else{ //If pos is 180 and/or isForward is false...
+        pos2 -= 5; //decrease angle by 5 degrees every cycle/iteration.
+        servo2.write(pos2); //Servo moves to position/angle.
+        if (pos2 == 0) { //If the position/angle of servo is 0...
+          isForward2 = true; //Make isForward true.
+        }
+        delay(10); //10 ms delay to let servo move before next position input.
+      }
+    break;
+    default: Serial.println("servoSweep function must have value of 1 or 2.");
+    break;
   }
-  else{ //If pos is 180 and/or isForward is false...
-    pos1 -= 5; //decrease angle by 5 degrees every cycle/iteration.
-    servoNum.write(pos1); //Servo moves to position/angle.
-    if (pos1 == 0) { //If the position/angle of servo is 0...
-      isForward1 = true; //Make isForward true.
-    }
-    delay(10); //10 ms delay to let servo move before next position input.
-  }
-  //NOTE TO SELF: check if 10 ms delay is necessary here.
+
+  //NOTE TO SELF: check if 10 ms delay is necessary at the end.
 }
 
 /**ultraSon handles an ultrasonic sensor.
@@ -108,36 +133,32 @@ void loop() {
   delay(30);
   // establish variables for duration of the ping, and the distance result
   // in inches and centimeters:
-  long duration1, duration2, cm1, cm2;
+  long cm1, cm2; //Distance detected by sensor1 and sensor2, respectively.
 
   cm1 = ultraSon(trigSensor1, echoSensor1); //Distance detected by sensor 1 is put into cm1.
   cm2 = ultraSon(trigSensor2, echoSensor2); //Distance detected by sensor 2 is put into cm2.
   
-  Serial.println(cm1);
-  //Serial.println();
+  //For printing the cm values:
+  //Serial.println(cm1); 
+  //Serial.println(cm2);
 
   if (cm1 < targetDistanceCm1) //If the distance detected by sensor1 is less than targetDistanceCm1 centimeters from an object.
   {
     Serial.println("One Go");
-    servoSweep(servo1);
+    servoSweep(1); //choose servo1
     delay(5); 
-
   }
   else
   {
     Serial.println("One Stop");
     delay(5); //without the delay, the motor gets stuck switching between both directions very quickly. Likely due to the ultrasonic sensor not sending data in time.
-
-    //NOTE: If the code works as intended, the cart/chassis will eventually reach a wall, go backwards, then get stuck between forwards and backwards.
-    //I'll need to figure out how to make the cart avoid the object entirely so it doesn't get stuck logically.
   }
 
   if (cm2 < targetDistanceCm2) //If distance detected by sensor2 is less than targetDistanceCm2 cm from object...
   {
     Serial.println("Two Go");
-    servoSweep(servo2);
+    servoSweep(2); //choose servo2
     delay(5); 
-
   }
   else
   {
@@ -146,7 +167,7 @@ void loop() {
   }
 
   //*****END OF LED AND MOTOR OUTPUT CODE*****
-  delay(50);
+  delay(50); //NOTE TO SELF: Is this big of a delay necessary?
 }
 
 

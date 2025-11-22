@@ -16,5 +16,6 @@ Overall the code works just fine for one servo and one sensor. Next task would b
 -Successfully compiled code that deals with two sensors and two servos. Not perfect, but it works.
 --For some reason, both servos go at double speed when both sensors detect an object. If only one sensor detects an object, its corresponding servo will respond normally.
 --Still a rough draft, so the actual code needs some refining to make adding move sensors and servos less tedious, and fix the problem mentioned above.
+-UPDATE: found out I never added a second variable for the second servo position. The servos went at double speed because their functions used the same position variable.
 
 Overall we can now use two sensors and two servos, with each servo corresponding to a sensor. Just need to figure out why the servos go at double speed when both sensors detect something.
