@@ -3,14 +3,7 @@
 
 /*
   This sketch uses the PING ))) example format provided by Arduino, with some modifications, to 
-  use an HC-SR04 sensor to detect distance and control the wheel motors based on the response. 
-  Draft 4 uses an H-bridge MOSFET (L298N) that can reverse polarity to reverse the direction of the motors.
-  If the cart/chassis does not detect an object in front of it, it will go forward. If it detects an object within a certain range,
-  it will go backwards. 
-  New/replaced variables include in1, in2, and enA for motor 1. in1 and in2 are used for motor direction logic,
-  enA handles the PWM for motor speed. 
-  This version successfully deals with one motor. The second motor will be implemented later.
-  This sketch can be modified to deal with tank turning, if code for the second motor and other sensors is implemented.
+  use multiple HC-SR04 sensors to detect distance and control multiple servo motors based on the response. 
   */
 //Alterations done by Maximo Ruiz and Trevor Onions (sensors team)
 
@@ -92,15 +85,11 @@ void servoSweep(int servoNum) {
 }
 
 /**ultraSon handles an ultrasonic sensor.
- * @param sensorNum The sensor chosen.
  * @param trigSensor The trigger pin for the sensor.
  * @param echoSensor The echo pin for the sensor.
 */
-int ultraSon(/*int sensorNum, */int trigSensor, int echoSensor) //TEMPORARILY REMOVED sensorNum
+int ultraSon(int trigSensor, int echoSensor)
 {
-  //NOTE TO SELF: in the const ints above, put the trigSensor and echoSensor values for each sensor into an array. 
-  //Index the array here based on sensorNum later. That way, only sensorNum will be needed.
-
   int distance; //"distance" is the distance calculated by the sensor in cm.
   int durationFunc; //"durationFunc" is the same as "duration", but in this function.
 
